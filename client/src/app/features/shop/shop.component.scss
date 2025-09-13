@@ -1,0 +1,10 @@
+.my-input {
+    border: 1px solid;
+    transition: border-color 0.3s ease;
+}
+
+.my-input:focus {
+    border: 2px solid;
+    border-color: #005cbb; /* Border color when the input is selected/focused */
+    outline: none; /* Remove default browser outline */
+}

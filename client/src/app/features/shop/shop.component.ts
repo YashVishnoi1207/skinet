@@ -13,6 +13,7 @@ import { ShopParams } from '../../shared/models/shopParams';
 import { MatPaginator, PageEvent } from '@angular/material/paginator'
 import { Pagination } from '../../shared/models/pagination';
 import { FormsModule } from '@angular/forms';
+import { MatInput } from "@angular/material/input";
 
 @Component({
   selector: 'app-shop',
@@ -26,7 +27,8 @@ import { FormsModule } from '@angular/forms';
     MatMenuTrigger,
     MatPaginator,
     FormsModule,
-    MatIconButton
+    MatIconButton,
+    MatInput
 ],
   templateUrl: './shop.component.html',
   styleUrl: './shop.component.scss'

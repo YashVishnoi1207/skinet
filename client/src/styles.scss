@@ -10,3 +10,11 @@
   ));
 }
 
+button.match-input-height {
+  // height: var(--mat-form-field-container-height) !important;
+  height: 56px !important;
+}
+
+.mdc-notched-outline__notch {
+  border-right-style: none !important;
+}
