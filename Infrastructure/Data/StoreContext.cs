@@ -13,11 +13,26 @@ namespace Infrastructure.Data
     {
         public DbSet<Product> Products { get; set; }
 
+        public DbSet<ShoppingCart> Carts { get; set; }
+
+        public DbSet<CartItem> CartItems { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ProductConfiguration).Assembly);
+
+            modelBuilder.Entity<ShoppingCart>().HasKey(x => x.Id);  
+
+            modelBuilder.Entity<CartItem>().HasKey(x => new {x.CartId, x.ProductId});
+
+            modelBuilder.Entity<CartItem>().Property(x => x.ProductId).
+            ValueGeneratedNever();
+
+            modelBuilder.Entity<ShoppingCart>().HasMany(x => x.Items).
+                WithOne().HasForeignKey(x => x.CartId).IsRequired();
         }
     }
 }
