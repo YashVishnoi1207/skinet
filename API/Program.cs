@@ -36,6 +36,8 @@ builder.Services.AddIdentityApiEndpoints<AppUser>().AddEntityFrameworkStores<Sto
 
 builder.Services.AddCors();
 
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

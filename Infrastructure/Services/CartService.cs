@@ -45,13 +45,39 @@ namespace Infrastructure.Services
             }
             else
             {
-                existingCart.Items.Clear();
-                foreach (var item in cart.Items)
-                {
-                    item.CartId = cart.Id;
-                    existingCart.Items.Add(item);
-                }
+                //update basic cart properties 
                 context.Entry(existingCart).CurrentValues.SetValues(cart);
+
+                var itemsToRemove = existingCart.Items.Where(i => !cart.Items.Any
+                (ci => ci.ProductId == i.ProductId)).ToList();
+
+                foreach (var itemToRemove in itemsToRemove)
+                {
+                    existingCart.Items.Remove(itemToRemove);
+                }
+
+                //Handle cart items
+                if (cart.Items != null && cart.Items.Any())
+                {
+
+                    foreach (var item in cart.Items)
+                    {
+                        var existingItem = existingCart.Items.FirstOrDefault
+                        (x => x.ProductId == item.ProductId);
+
+                        if (existingItem != null)
+                        {
+                            existingItem.Quantity = item.Quantity;
+                            existingItem.Price = item.Price;
+                        }
+                        else
+                        {
+                            //Add new item
+                            item.CartId = cart.Id;
+                            existingCart.Items.Add(item);
+                        }
+                    }
+                }
             }                
             await context.SaveChangesAsync();
 
