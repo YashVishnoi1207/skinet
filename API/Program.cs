@@ -4,6 +4,7 @@ using Core.Entities;
 using Core.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
@@ -22,21 +23,13 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// builder.Services.AddSingleton<IConnectionMultiplexer>(config =>
-// {
-//     var connString = builder.Configuration.GetConnectionString("Redis")
-//         ?? throw new Exception("Cannot get redis connection string");
-//     var options = ConfigurationOptions.Parse(connString, true);
-//     options.Ssl = true;
-//     options.AbortOnConnectFail = false;
-//     return ConnectionMultiplexer.Connect(options);
-// });
-
 builder.Services.AddScoped<ICartService, CartService>();
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddIdentityApiEndpoints<AppUser>().AddEntityFrameworkStores<StoreContext>();
+builder.Services.AddIdentityApiEndpoints<AppUser>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<StoreContext>();
 
 builder.Services.AddCors();
 
@@ -56,6 +49,9 @@ app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowCredentials()
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseAuthorization();
 
 app.MapControllers();
@@ -64,17 +60,20 @@ app.MapGroup("api").MapIdentityApi<AppUser>(); // api/login
 
 app.MapHub<NotificationHub>("/hub/notifications");
 
-// try
-// {
-//     using var scope = app.Services.CreateScope();
-//     var services = scope.ServiceProvider;
-//     var content = services.GetRequiredService<StoreContext>();
-//     await content.Database.MigrateAsync();
-//     await StoreContextSeed.SeedAsync(content);    
-// }
-// catch (Exception ex)
-// {
-//     Console.WriteLine(ex);
-//     throw;
-// }
+app.MapFallbackToController("Index", "Fallback");
+
+try
+{
+    using var scope = app.Services.CreateScope();
+    var services = scope.ServiceProvider;
+    var content = services.GetRequiredService<StoreContext>();
+    var userManager = services.GetRequiredService<UserManager<AppUser>>();
+    await content.Database.MigrateAsync();
+    await StoreContextSeed.SeedAsync(content, userManager);    
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex);
+    throw;
+}
 app.Run();

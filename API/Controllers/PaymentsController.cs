@@ -72,11 +72,11 @@ namespace API.Controllers
             if (intent.Status == "succeeded")
             {
                 var spec = new OrderSpecification(intent.Id, true);
-
                 var order = await unit.Repository<Order>().GetEntityWithSpec(spec)
-                    ?? throw new Exception("Order not found");
-
-                if ((long)order.GetTotal() * 100 != intent.Amount)
+                ?? throw new Exception("Order not found");
+                var orderTotalInCents = (long)Math.Round(order.GetTotal() * 100,
+                MidpointRounding.AwayFromZero);
+                if (orderTotalInCents != intent.Amount)
                 {
                     order.Status = OrderStatus.PaymentMismatch;
                 }
@@ -84,14 +84,12 @@ namespace API.Controllers
                 {
                     order.Status = OrderStatus.PaymentReceived;
                 }
-
                 await unit.Complete();
-
                 var connectionId = NotificationHub.GetConnectionIdByEmail(order.BuyerEmail);
-
-                if(!string.IsNullOrEmpty(connectionId))
+                if (!string.IsNullOrEmpty(connectionId))
                 {
-                    await hubContext.Clients.Client(connectionId).SendAsync("OrderCompleteNotification", order.ToDto());
+                    await hubContext.Clients.Client(connectionId)
+                    .SendAsync("OrderCompleteNotification", order.ToDto());
                 }
             }
         }
