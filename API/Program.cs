@@ -62,18 +62,18 @@ app.MapHub<NotificationHub>("/hub/notifications");
 
 app.MapFallbackToController("Index", "Fallback");
 
-try
-{
-    using var scope = app.Services.CreateScope();
-    var services = scope.ServiceProvider;
-    var content = services.GetRequiredService<StoreContext>();
-    var userManager = services.GetRequiredService<UserManager<AppUser>>();
-    await content.Database.MigrateAsync();
-    await StoreContextSeed.SeedAsync(content, userManager);    
-}
-catch (Exception ex)
-{
-    Console.WriteLine(ex);
-    throw;
-}
+// try
+// {
+//     using var scope = app.Services.CreateScope();
+//     var services = scope.ServiceProvider;
+//     var content = services.GetRequiredService<StoreContext>();
+//     var userManager = services.GetRequiredService<UserManager<AppUser>>();
+//     await content.Database.MigrateAsync();
+//     await StoreContextSeed.SeedAsync(content, userManager);    
+// }
+// catch (Exception ex)
+// {
+//     Console.WriteLine(ex);
+//     throw;
+// }
 app.Run();
